@@ -68,17 +68,21 @@ class DB {
 
   //&& room.roomUsers[0].id !== myId
   getEmptyRoom() {
-    return (
-      this.rooms.find((room) => {
-        if (room.roomUsers.length === 1) return true;
-        return false;
-      }) || null
-    );
+    return this.rooms.filter((room) => {
+      if (room.roomUsers.length === 1) return true;
+      return false;
+    });
   }
 
   addUserToRoom(user_to_add: Omit<UserT, "password">, roomId: string) {
-    const curRoom = this.rooms.find((room) => room.roomId === roomId);
+    const curRoom = this.rooms.find((room) => {
+      if (room.roomId === roomId && room.roomUsers[0].id !== user_to_add.id)
+        return true;
+      return false;
+    });
+    if (!curRoom) return false;
     curRoom.roomUsers.push(user_to_add);
+    return curRoom;
   }
 }
 
