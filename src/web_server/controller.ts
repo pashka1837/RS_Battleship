@@ -5,7 +5,7 @@ import create_room_ctrlr from "./controllers/create_room_controller.js";
 import ws_ids_db from "../db/ws_ids_db.js";
 import add_usr_t_rm_cntrlr from "./controllers/add_usr_t_rm_cntrlr.js";
 
-export default function check_message(message: any, ws: WebSocket) {
+export default function controller(message: any, ws: WebSocket) {
   const req = JSON.parse(message);
   const { type, data: dataJSON } = req;
 
@@ -31,8 +31,7 @@ export default function check_message(message: any, ws: WebSocket) {
         const data = dataJSON ? JSON.parse(dataJSON) : null;
         const curUserId = ws_ids_db.get(ws);
 
-        const crtRoomResponse = add_usr_t_rm_cntrlr(data.indexRoom, curUserId);
-        // ws.send(crtRoomResponse);
+        add_usr_t_rm_cntrlr(data.indexRoom, curUserId);
       }
       break;
 

@@ -9,7 +9,7 @@ export default function add_usr_t_rm_cntrlr(
   console.log("add_user_to_room");
   const curUser = db.getUserById(enterUserID);
   const curRoom = db.addUserToRoom(curUser, enterRoomID);
-  if (!curRoom) return null;
+  if (!curRoom) return;
   update_room_controller();
 
   ws_ids_db.forEach((id, ws) => {

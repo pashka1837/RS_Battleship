@@ -1,9 +1,11 @@
 import { randomUUID, createHash } from "node:crypto";
+import { WebSocket } from "ws";
 
 type UserT = {
   name: string;
   password: string;
   id: `${string}-${string}-${string}-${string}-${string}`;
+  isOnline: boolean;
 };
 
 type RoomT = {
@@ -14,6 +16,10 @@ type RoomT = {
 class DB {
   private users: UserT[] = [];
   private rooms: RoomT[] = [];
+  private usersMap = new Map<string, UserT>();
+  private ws_users_Map = new Map<WebSocket, UserT>();
+  // private onlineUsersSet = new Map<WebSocket, UserT>();
+  private foundUser: UserT | null = null;
 
   get getUsers() {
     return this.users;
@@ -22,26 +28,47 @@ class DB {
     return this.rooms;
   }
 
-  getUserById(id: string) {
-    return this.users.find((user) => user.id === id);
+  get getUsersMap() {
+    return this.usersMap;
+  }
+
+  get getFoundUser() {
+    return this.foundUser;
+  }
+
+  // setRooms() {
+  //   this.rooms = this.rooms.filter((room) => room.roomUsers.length === 1);
+  // }
+
+  // getUserById(id: string) {
+  //   return this.users.find((user) => user.id === id);
+  // }
+
+  setWsUsersMap(ws: WebSocket, newUser: UserT) {
+    this.ws_users_Map.set(ws, newUser);
   }
 
   getUserByName(name: string) {
-    return this.users.find((user) => user.name === name);
+    this.foundUser = [...this.usersMap]
+      .find(([_, user]) => user.name === name)
+      ?.at(1) as UserT;
   }
+  // getUserByName(name: string) {
+  //   return this.users.find((user) => user.name === name);
+  // }
 
   isAuthUser(newUser: Omit<UserT, "id">) {
-    const foundUser = this.getUserByName(newUser.name);
-    if (!foundUser) return false;
+    this.getUserByName(newUser.name);
+    if (!this.foundUser) return false;
     const newPassword = createHash("sha256")
       .update(newUser.password)
       .digest("hex");
-    return newPassword === foundUser.password;
+    return newPassword === this.foundUser.password;
   }
 
   addNewUser(newUser: Omit<UserT, "id">) {
-    const foundUser = this.getUserByName(newUser.name);
-    if (foundUser) return null;
+    // const foundUser = this.getUserByName(newUser.name);
+    if (this.foundUser) return null;
     const newPassword = createHash("sha256")
       .update(newUser.password)
       .digest("hex");
@@ -50,8 +77,10 @@ class DB {
       name: newUser.name,
       password: newPassword,
       id: newId,
+      isOnline: false,
     };
-    this.users.push(createdUser);
+    // this.users.push(createdUser);
+    this.usersMap.set(createdUser.id, createdUser);
     return createdUser;
   }
 
@@ -67,9 +96,10 @@ class DB {
   }
 
   //&& room.roomUsers[0].id !== myId
-  getEmptyRoom() {
+  getEmptyRoom(id: string) {
     return this.rooms.filter((room) => {
-      if (room.roomUsers.length === 1) return true;
+      if (room.roomUsers.length === 1 && room.roomUsers[0].id !== id)
+        return true;
       return false;
     });
   }
