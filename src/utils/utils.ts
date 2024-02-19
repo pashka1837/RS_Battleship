@@ -27,3 +27,5 @@ export function createResponse(type: string, data: any, id = 0) {
   };
   return JSON.stringify(response);
 }
+
+export const random = () => Math.floor(Math.random() * 2);

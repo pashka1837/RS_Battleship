@@ -17,8 +17,8 @@ export default function add_usr_t_rm_cntrlr(
 
   const newGame = {
     gameId: randomUUID(),
-    players: [],
   };
+  db.addNewGame(newGame);
 
   db.ws_users_Map.forEach((user, ws) => {
     if (
@@ -29,7 +29,6 @@ export default function add_usr_t_rm_cntrlr(
         idGame: newGame.gameId,
         idPlayer: user.id,
       });
-      newGame.players.push(user.id);
       ws.send(response);
     }
   });

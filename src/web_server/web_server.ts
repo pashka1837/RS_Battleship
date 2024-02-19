@@ -11,16 +11,14 @@ webSoscketServer.on("connection", (ws: WebSocket, _request, _client) => {
 
   ws.on("message", (message) => {
     controller(message, ws);
-    console.log(db.getUsersMap, "\n", db.getRoomsMap);
+    // console.log(db.getUsersMap, "\n", db.getRoomsMap);
   });
-  // db.ws_users_Map
   ws.on("close", () => {
     console.log("close");
     const delUser = db.ws_users_Map.get(ws);
     delUser.isOnline = false;
     db.ws_users_Map.delete(ws);
   });
-  // ws.send(JSON.stringify("hello"));
 });
 
 webSoscketServer.on("listening", (ws, request, client) => {

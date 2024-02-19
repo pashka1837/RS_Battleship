@@ -13,13 +13,39 @@ type RoomT = {
   roomUsers: Omit<UserT, "password">[];
 };
 
-class DB {
-  private gamesMap = new Map<string, RoomT>();
+type ShipT = {
+  position: {
+    x: number;
+    y: number;
+  };
+  direction: boolean;
+  type: "small" | "medium" | "large" | "huge";
+  length: number;
+};
 
+// type PlayerMapT = Map<string, PlayerT>;
+
+type PlayerT = {
+  playerId: `${string}-${string}-${string}-${string}-${string}`;
+  ships: ShipT[];
+};
+
+type GameT = {
+  gameId: `${string}-${string}-${string}-${string}-${string}`;
+  players: Map<string, PlayerT>;
+  currentPlayerId: string;
+};
+
+class DB {
+  private gamesMap = new Map<string, GameT>();
   private roomsMap = new Map<string, RoomT>();
   private usersMap = new Map<string, UserT>();
   public ws_users_Map = new Map<WebSocket, UserT>();
   private foundUser: UserT | null = null;
+
+  get getGamesMap() {
+    return this.gamesMap;
+  }
 
   get getUsersMap() {
     return this.usersMap;
@@ -106,8 +132,20 @@ class DB {
     return curRoom;
   }
 
-  addNewGame(newGame) {
-    this.gamesMap.set(newGame.id, newGame);
+  addNewGame(newGame: any) {
+    newGame.players = new Map<string, PlayerT>();
+    newGame.currentPlayerId = "";
+    this.gamesMap.set(newGame.gameId, newGame);
+  }
+
+  addGamePlayers(newPlayer: any) {
+    const curGame = this.gamesMap.get(newPlayer.gameId);
+    const curPlayer: PlayerT = {
+      playerId: newPlayer.indexPlayer,
+      ships: newPlayer.ships,
+    };
+    curGame.players.set(curPlayer.playerId, curPlayer);
+    return curGame;
   }
 }
 
