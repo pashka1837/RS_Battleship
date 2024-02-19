@@ -6,6 +6,7 @@ import add_usr_t_rm_cntrlr from "./controllers/add_usr_t_rm_cntrlr.js";
 import db from "../db/db.js";
 import add_ships_controller from "./controllers/add_ships.js";
 import attack_controller from "./controllers/attack_controller.js";
+import turn_controller from "./controllers/turn_controller.js";
 
 export default function controller(message: any, ws: WebSocket) {
   const req = JSON.parse(message);
@@ -38,12 +39,14 @@ export default function controller(message: any, ws: WebSocket) {
       {
         const data = JSON.parse(dataJSON);
         add_ships_controller(ws, data);
+        turn_controller(data.gameId);
       }
       break;
     case "attack":
       {
         const data = JSON.parse(dataJSON);
         attack_controller(data, ws);
+        turn_controller(data.gameId);
       }
       break;
 

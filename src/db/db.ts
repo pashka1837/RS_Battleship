@@ -47,6 +47,10 @@ class DB {
     return this.gamesMap.get(id);
   }
 
+  get getGameMap() {
+    return this.gamesMap;
+  }
+
   get getUsersMap() {
     return this.usersMap;
   }
