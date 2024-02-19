@@ -8,6 +8,7 @@ import add_ships_controller from "./controllers/add_ships.js";
 import attack_controller from "./controllers/attack_controller.js";
 import turn_controller from "./controllers/turn_controller.js";
 import { random } from "../utils/utils.js";
+import winner_controller from "./controllers/winner_controller.js";
 
 export default function controller(message: any, ws: WebSocket) {
   const req = JSON.parse(message);
@@ -20,13 +21,15 @@ export default function controller(message: any, ws: WebSocket) {
         const regResponse = reg_controller(data, ws);
         ws.send(regResponse);
         const curUser = db.ws_users_Map.get(ws);
-        if (curUser) update_room_controller();
+        if (curUser) {
+          update_room_controller();
+          winner_controller();
+        }
       }
       break;
     case "create_room":
       {
-        const crtRoomResponse = create_room_ctrlr(ws);
-        ws.send(crtRoomResponse);
+        create_room_ctrlr(ws);
         update_room_controller(ws);
       }
       break;

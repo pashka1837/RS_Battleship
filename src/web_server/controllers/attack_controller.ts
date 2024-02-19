@@ -2,6 +2,7 @@ import { WebSocket } from "ws";
 
 import db from "../../db/db.js";
 import { createResponse } from "../../utils/utils.js";
+import winner_controller from "./winner_controller.js";
 
 export default function attack_controller(
   data: any,
@@ -63,12 +64,15 @@ export default function attack_controller(
   }
 
   if (!enemyPlayer.ships.length) {
+    const winner = db.getUsersMap.get(curPlayerId);
+    winner.wins += 1;
     db.ws_users_Map.forEach((user, ws) => {
       if (curGame.players.has(user.id)) {
         const response = createResponse("finish", { winPlayer: curPlayerId });
         ws.send(response);
       }
     });
+    winner_controller();
     return false;
   }
 

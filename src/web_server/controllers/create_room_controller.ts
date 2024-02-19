@@ -6,5 +6,6 @@ export default function create_room_ctrlr(ws: WebSocket) {
   console.log("create_room");
   const curUser = db.ws_users_Map.get(ws);
   const newRoom = db.createRoom(curUser);
-  return createResponse("create_room", [newRoom]);
+  const response = createResponse("create_room", [newRoom]);
+  ws.send(response);
 }
