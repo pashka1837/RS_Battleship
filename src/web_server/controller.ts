@@ -29,7 +29,7 @@ export default function controller(message: any, ws: WebSocket) {
       break;
     case "add_user_to_room":
       {
-        const data = dataJSON ? JSON.parse(dataJSON) : null;
+        const data = JSON.parse(dataJSON);
         const curUserId = ws_ids_db.get(ws);
 
         add_usr_t_rm_cntrlr(data.indexRoom, curUserId);
