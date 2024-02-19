@@ -7,6 +7,7 @@ import db from "../db/db.js";
 import add_ships_controller from "./controllers/add_ships.js";
 import attack_controller from "./controllers/attack_controller.js";
 import turn_controller from "./controllers/turn_controller.js";
+import { random } from "../utils/utils.js";
 
 export default function controller(message: any, ws: WebSocket) {
   const req = JSON.parse(message);
@@ -45,8 +46,18 @@ export default function controller(message: any, ws: WebSocket) {
     case "attack":
       {
         const data = JSON.parse(dataJSON);
-        attack_controller(data, ws);
-        turn_controller(data.gameId);
+        const isAttackSuccess = attack_controller(data, ws);
+        if (isAttackSuccess) turn_controller(data.gameId);
+      }
+      break;
+    case "randomAttack":
+      {
+        const data = JSON.parse(dataJSON);
+
+        data.x = random(10);
+        data.y = random(10);
+        const isAttackSuccess = attack_controller(data, ws, true);
+        if (isAttackSuccess) turn_controller(data.gameId);
       }
       break;
 

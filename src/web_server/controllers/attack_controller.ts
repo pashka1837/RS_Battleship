@@ -3,11 +3,19 @@ import { WebSocket } from "ws";
 import db from "../../db/db.js";
 import { createResponse } from "../../utils/utils.js";
 
-export default function attack_controller(data: any, curWS: WebSocket) {
-  console.log("attack");
+export default function attack_controller(
+  data: any,
+  curWS: WebSocket,
+  random = false
+) {
   const { x: attackX, y: attackY, gameId, indexPlayer: curPlayerId } = data;
 
   const curGame = db.getGameById(gameId);
+
+  if (curGame.currentPlayerId !== curPlayerId) return false;
+
+  console.log(random ? "random attack" : "attack");
+
   const enemyPlayer = [...curGame.players.values()].find(
     (player) => player.playerId !== curPlayerId
   );
@@ -83,6 +91,7 @@ export default function attack_controller(data: any, curWS: WebSocket) {
       curWS.send(response);
     });
   }
+  return true;
 }
 
 // for (let i = 0; i < curShip.length; i++) {
