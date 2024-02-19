@@ -43,8 +43,8 @@ class DB {
   public ws_users_Map = new Map<WebSocket, UserT>();
   private foundUser: UserT | null = null;
 
-  get getGamesMap() {
-    return this.gamesMap;
+  getGameById(id: string) {
+    return this.gamesMap.get(id);
   }
 
   get getUsersMap() {
