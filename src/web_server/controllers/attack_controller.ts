@@ -62,6 +62,16 @@ export default function attack_controller(
       : enemyPlayer.ships.splice(removeI, 1);
   }
 
+  if (!enemyPlayer.ships.length) {
+    db.ws_users_Map.forEach((user, ws) => {
+      if (curGame.players.has(user.id)) {
+        const response = createResponse("finish", { winPlayer: curPlayerId });
+        ws.send(response);
+      }
+    });
+    return false;
+  }
+
   if (isHit !== "killed") {
     const resData = {
       position: {

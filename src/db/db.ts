@@ -6,6 +6,7 @@ type UserT = {
   password: string;
   id: `${string}-${string}-${string}-${string}-${string}`;
   isOnline: boolean;
+  wins: number;
 };
 
 type RoomT = {
@@ -93,6 +94,7 @@ class DB {
       password: newPassword,
       id: newId,
       isOnline: false,
+      wins: 0,
     };
 
     this.usersMap.set(createdUser.id, createdUser);
@@ -112,6 +114,7 @@ class DB {
     const roomId = randomUUID();
     const newUser = { ...user_to_add };
     delete newUser.password;
+    delete newUser.wins;
     const roomUsers = [user_to_add];
     const newRoom: RoomT = {
       roomId,
@@ -133,6 +136,7 @@ class DB {
     const curRoom = this.roomsMap.get(roomID);
     const newUser = { ...user_to_add };
     delete newUser.password;
+    delete newUser.wins;
     curRoom.roomUsers.push(newUser);
     return curRoom;
   }
