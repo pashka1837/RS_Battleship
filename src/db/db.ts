@@ -14,52 +14,30 @@ type RoomT = {
 };
 
 class DB {
-  private users: UserT[] = [];
-  private rooms: RoomT[] = [];
+  private gamesMap = new Map<string, RoomT>();
+
   private roomsMap = new Map<string, RoomT>();
   private usersMap = new Map<string, UserT>();
   public ws_users_Map = new Map<WebSocket, UserT>();
   private foundUser: UserT | null = null;
 
-  get getUsers() {
-    return this.users;
-  }
-  get getRooms() {
-    return this.rooms;
-  }
-
   get getUsersMap() {
     return this.usersMap;
+  }
+
+  get getRoomsMap() {
+    return this.roomsMap;
   }
 
   get getFoundUser() {
     return this.foundUser;
   }
 
-  // setRooms() {
-  //   this.rooms = this.rooms.filter((room) => room.roomUsers.length === 1);
-  // }
-
-  // getUserById(id: string) {
-  //   return this.users.find((user) => user.id === id);
-  // }
-
-  // getUserByWS(ws:WebSocket){
-  //   this.ws_users_Map.get(ws, newUser);
-  // }
-
-  // setWsUsersMap(ws: WebSocket, newUser: UserT) {
-  //   this.ws_users_Map.set(ws, newUser);
-  // }
-
   getUserByName(name: string) {
     this.foundUser = [...this.usersMap.values()].find(
       (user) => user.name === name
     );
   }
-  // getUserByName(name: string) {
-  //   return this.users.find((user) => user.name === name);
-  // }
 
   isAuthUser(newUser: Omit<UserT, "id">) {
     this.getUserByName(newUser.name);
@@ -71,7 +49,6 @@ class DB {
   }
 
   addNewUser(newUser: Omit<UserT, "id">) {
-    // const foundUser = this.getUserByName(newUser.name);
     if (this.foundUser) {
       this.foundUser = null;
       return null;
@@ -86,7 +63,7 @@ class DB {
       id: newId,
       isOnline: false,
     };
-    // this.users.push(createdUser);
+
     this.usersMap.set(createdUser.id, createdUser);
     return createdUser;
   }
@@ -102,7 +79,8 @@ class DB {
     });
     if (isAlreadyExists) return null;
     const roomId = randomUUID();
-    delete user_to_add.password;
+    const newUser = { ...user_to_add };
+    delete newUser.password;
     const roomUsers = [user_to_add];
     const newRoom: RoomT = {
       roomId,
@@ -112,7 +90,6 @@ class DB {
     return newRoom;
   }
 
-  //&& room.roomUsers[0].id !== myId
   getEmptyRooms(id: string) {
     return [...this.roomsMap.values()].filter((room) => {
       if (room.roomUsers.length === 1 && room.roomUsers[0].id !== id)
@@ -121,15 +98,16 @@ class DB {
     });
   }
 
-  addUserToRoom(user_to_add: Omit<UserT, "password">, roomId: string) {
-    const curRoom = this.rooms.find((room) => {
-      if (room.roomId === roomId && room.roomUsers[0].id !== user_to_add.id)
-        return true;
-      return false;
-    });
-    if (!curRoom) return false;
-    curRoom.roomUsers.push(user_to_add);
+  addUserToRoom(user_to_add: UserT, roomID: string) {
+    const curRoom = this.roomsMap.get(roomID);
+    const newUser = { ...user_to_add };
+    delete newUser.password;
+    curRoom.roomUsers.push(newUser);
     return curRoom;
+  }
+
+  addNewGame(newGame) {
+    this.gamesMap.set(newGame.id, newGame);
   }
 }
 

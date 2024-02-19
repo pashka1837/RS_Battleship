@@ -1,6 +1,5 @@
 import { WebSocketServer, WebSocket, AddressInfo } from "ws";
 import controller from "./controller.js";
-import ws_ids_db from "../db/ws_ids_db.js";
 import db from "../db/db.js";
 
 export const webSoscketServer = new WebSocketServer({
@@ -12,7 +11,7 @@ webSoscketServer.on("connection", (ws: WebSocket, _request, _client) => {
 
   ws.on("message", (message) => {
     controller(message, ws);
-    console.log(db.getUsersMap, "\n");
+    console.log(db.getUsersMap, "\n", db.getRoomsMap);
   });
   // db.ws_users_Map
   ws.on("close", () => {
