@@ -1,6 +1,7 @@
 import { WebSocketServer, WebSocket, AddressInfo } from "ws";
 import controller from "./controller.js";
 import ws_ids_db from "../db/ws_ids_db.js";
+import db from "../db/db.js";
 
 export const webSoscketServer = new WebSocketServer({
   port: 3000,
@@ -11,13 +12,14 @@ webSoscketServer.on("connection", (ws: WebSocket, _request, _client) => {
 
   ws.on("message", (message) => {
     controller(message, ws);
-    // res.forEach((r) => ws.send(r));
-    // console.log(res);
+    console.log(db.getUsersMap, "\n");
   });
+  // db.ws_users_Map
   ws.on("close", () => {
     console.log("close");
-    const delID = ws_ids_db.get(ws);
-    ws_ids_db.delete(ws);
+    const delUser = db.ws_users_Map.get(ws);
+    delUser.isOnline = false;
+    db.ws_users_Map.delete(ws);
   });
   // ws.send(JSON.stringify("hello"));
 });

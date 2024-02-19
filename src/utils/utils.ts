@@ -17,3 +17,13 @@ export function createRegResponse(
   };
   return JSON.stringify(response);
 }
+
+export function createResponse(type: string, data: any, id = 0) {
+  const jsonData = data && JSON.stringify(data);
+  const response = {
+    type,
+    data: jsonData,
+    id,
+  };
+  return JSON.stringify(response);
+}

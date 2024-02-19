@@ -16,9 +16,9 @@ type RoomT = {
 class DB {
   private users: UserT[] = [];
   private rooms: RoomT[] = [];
+  private roomsMap = new Map<string, RoomT>();
   private usersMap = new Map<string, UserT>();
-  private ws_users_Map = new Map<WebSocket, UserT>();
-  // private onlineUsersSet = new Map<WebSocket, UserT>();
+  public ws_users_Map = new Map<WebSocket, UserT>();
   private foundUser: UserT | null = null;
 
   get getUsers() {
@@ -44,14 +44,18 @@ class DB {
   //   return this.users.find((user) => user.id === id);
   // }
 
-  setWsUsersMap(ws: WebSocket, newUser: UserT) {
-    this.ws_users_Map.set(ws, newUser);
-  }
+  // getUserByWS(ws:WebSocket){
+  //   this.ws_users_Map.get(ws, newUser);
+  // }
+
+  // setWsUsersMap(ws: WebSocket, newUser: UserT) {
+  //   this.ws_users_Map.set(ws, newUser);
+  // }
 
   getUserByName(name: string) {
-    this.foundUser = [...this.usersMap]
-      .find(([_, user]) => user.name === name)
-      ?.at(1) as UserT;
+    this.foundUser = [...this.usersMap.values()].find(
+      (user) => user.name === name
+    );
   }
   // getUserByName(name: string) {
   //   return this.users.find((user) => user.name === name);
@@ -68,7 +72,10 @@ class DB {
 
   addNewUser(newUser: Omit<UserT, "id">) {
     // const foundUser = this.getUserByName(newUser.name);
-    if (this.foundUser) return null;
+    if (this.foundUser) {
+      this.foundUser = null;
+      return null;
+    }
     const newPassword = createHash("sha256")
       .update(newUser.password)
       .digest("hex");
@@ -84,20 +91,30 @@ class DB {
     return createdUser;
   }
 
-  createRoom(user_to_add: Omit<UserT, "password">) {
+  createRoom(user_to_add: UserT) {
+    const isAlreadyExists = [...this.roomsMap.values()].find((room) => {
+      if (
+        room.roomUsers.length === 1 &&
+        room.roomUsers[0].id === user_to_add.id
+      )
+        return true;
+      return false;
+    });
+    if (isAlreadyExists) return null;
     const roomId = randomUUID();
+    delete user_to_add.password;
     const roomUsers = [user_to_add];
     const newRoom: RoomT = {
       roomId,
       roomUsers,
     };
-    this.rooms.push(newRoom);
+    this.roomsMap.set(roomId, newRoom);
     return newRoom;
   }
 
   //&& room.roomUsers[0].id !== myId
-  getEmptyRoom(id: string) {
-    return this.rooms.filter((room) => {
+  getEmptyRooms(id: string) {
+    return [...this.roomsMap.values()].filter((room) => {
       if (room.roomUsers.length === 1 && room.roomUsers[0].id !== id)
         return true;
       return false;
