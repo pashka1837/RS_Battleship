@@ -21,6 +21,7 @@ type ShipT = {
   direction: boolean;
   type: "small" | "medium" | "large" | "huge";
   length: number;
+  lifesLeft: number;
 };
 
 // type PlayerMapT = Map<string, PlayerT>;
@@ -146,7 +147,10 @@ class DB {
     const curGame = this.gamesMap.get(newPlayer.gameId);
     const curPlayer: PlayerT = {
       playerId: newPlayer.indexPlayer,
-      ships: newPlayer.ships,
+      ships: newPlayer.ships.map((ship) => ({
+        ...ship,
+        lifesLeft: ship.length,
+      })),
     };
     curGame.players.set(curPlayer.playerId, curPlayer);
     return curGame;
