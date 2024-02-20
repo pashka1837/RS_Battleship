@@ -1,48 +1,6 @@
 import { randomUUID, createHash } from "node:crypto";
 import { WebSocket } from "ws";
-
-type UserT = {
-  name: string;
-  password: string;
-  id: `${string}-${string}-${string}-${string}-${string}`;
-  isOnline: boolean;
-  wins: number;
-  roomId: string;
-};
-
-type roomUserT = {
-  id: UserT["id"];
-  name: UserT["name"];
-  ws: WebSocket;
-};
-
-type RoomT = {
-  roomId: `${string}-${string}-${string}-${string}-${string}`;
-  roomUsers: roomUserT[];
-};
-
-type ShipT = {
-  position: {
-    x: number;
-    y: number;
-  };
-  direction: boolean;
-  type: "small" | "medium" | "large" | "huge";
-  length: number;
-  lifesLeft: number;
-};
-
-type PlayerT = {
-  playerId: `${string}-${string}-${string}-${string}-${string}`;
-  playerWs: WebSocket;
-  ships: ShipT[];
-};
-
-type GameT = {
-  gameId: `${string}-${string}-${string}-${string}-${string}`;
-  players: Map<string, PlayerT>;
-  currentPlayerId: string;
-};
+import { GameT, PlayerT, RoomT, UserT, roomUserT } from "./dbTypes.js";
 
 class DB {
   private gamesMap = new Map<string, GameT>();
@@ -105,14 +63,6 @@ class DB {
   }
 
   addNewRoom(creator_user: UserT, ws: WebSocket) {
-    // const isAlreadyExists = [...this.roomsMap.values()].some((room) => {
-    //   if (
-    //     room.roomUsers.length === 1 &&
-    //     room.roomUsers[0].id === user_to_add.id
-    //   )
-    //     return true;
-    //   return false;
-    // });
     const isAlreadyExists = creator_user.roomId ? true : false;
     if (isAlreadyExists) return null;
     const roomId = randomUUID();

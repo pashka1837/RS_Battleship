@@ -25,6 +25,9 @@ export default function add_usr_t_rm_cntrlr(
 
   curRoom.roomUsers.forEach((roomUser) => {
     const { id, ws } = roomUser;
+    const u = db.getUsersMap.get(id);
+    u.roomId = "";
+
     const response = createResponse("create_game", {
       idGame: newGame.gameId,
       idPlayer: id,

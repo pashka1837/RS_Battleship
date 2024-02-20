@@ -34,19 +34,19 @@ export default function controller(message: any, ws: WebSocket) {
     case "add_user_to_room":
       {
         add_usr_t_rm_cntrlr(data.indexRoom, ws);
-        console.log(db.getRoomsMap);
+        // console.log(db.getRoomsMap);
       }
       break;
     case "add_ships":
       {
         add_ships_controller(ws, data);
         turn_controller(data.gameId);
-        console.log(db.getGameMap);
+        // console.log(db.getGameMap);
       }
       break;
     case "attack":
       {
-        const isGameFinsished = attack_controller(data, ws);
+        const isGameFinsished = attack_controller(data);
         if (!isGameFinsished) turn_controller(data.gameId);
       }
       break;
@@ -54,7 +54,7 @@ export default function controller(message: any, ws: WebSocket) {
       {
         data.x = random(10);
         data.y = random(10);
-        const isGameFinsished = attack_controller(data, ws, true);
+        const isGameFinsished = attack_controller(data, true);
         if (!isGameFinsished) turn_controller(data.gameId);
       }
       break;
