@@ -10,8 +10,11 @@ export default function add_usr_t_rm_cntrlr(
 ) {
   console.log("add_user_to_room");
 
-  const curUser = db.ws_users_Map.get(curWS);
-  const curRoom = db.addUserToRoom(curUser, enterRoomID);
+  const addUser = db.ws_users_Map.get(curWS);
+  const curRoom = db.addUserToRoom(addUser, enterRoomID, curWS);
+
+  db.getRoomsMap.delete(enterRoomID);
+  if (addUser.roomId) db.getRoomsMap.delete(addUser.roomId);
 
   update_room_controller();
 
@@ -20,16 +23,12 @@ export default function add_usr_t_rm_cntrlr(
   };
   db.addNewGame(newGame);
 
-  db.ws_users_Map.forEach((user, ws) => {
-    if (
-      user.id === curRoom.roomUsers[0].id ||
-      user.id === curRoom.roomUsers[1].id
-    ) {
-      const response = createResponse("create_game", {
-        idGame: newGame.gameId,
-        idPlayer: user.id,
-      });
-      ws.send(response);
-    }
+  curRoom.roomUsers.forEach((roomUser) => {
+    const { id, ws } = roomUser;
+    const response = createResponse("create_game", {
+      idGame: newGame.gameId,
+      idPlayer: id,
+    });
+    ws.send(response);
   });
 }

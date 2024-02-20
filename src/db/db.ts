@@ -7,11 +7,18 @@ type UserT = {
   id: `${string}-${string}-${string}-${string}-${string}`;
   isOnline: boolean;
   wins: number;
+  roomId: string;
+};
+
+type roomUserT = {
+  id: UserT["id"];
+  name: UserT["name"];
+  ws: WebSocket;
 };
 
 type RoomT = {
   roomId: `${string}-${string}-${string}-${string}-${string}`;
-  roomUsers: Omit<UserT, "password">[];
+  roomUsers: roomUserT[];
 };
 
 type ShipT = {
@@ -25,10 +32,9 @@ type ShipT = {
   lifesLeft: number;
 };
 
-// type PlayerMapT = Map<string, PlayerT>;
-
 type PlayerT = {
   playerId: `${string}-${string}-${string}-${string}-${string}`;
+  playerWs: WebSocket;
   ships: ShipT[];
 };
 
@@ -61,26 +67,22 @@ class DB {
     return this.roomsMap;
   }
 
-  get getFoundUser() {
-    return this.foundUser;
-  }
-
   getUserByName(name: string) {
     this.foundUser = [...this.usersMap.values()].find(
       (user) => user.name === name
     );
   }
 
-  isAuthUser(newUser: Omit<UserT, "id">) {
+  isAuthUser(newUser: any) {
     this.getUserByName(newUser.name);
     if (!this.foundUser) return false;
     const newPassword = createHash("sha256")
       .update(newUser.password)
       .digest("hex");
-    return newPassword === this.foundUser.password;
+    return newPassword === this.foundUser.password && this.foundUser;
   }
 
-  addNewUser(newUser: Omit<UserT, "id">) {
+  addNewUser(newUser: any) {
     if (this.foundUser) {
       this.foundUser = null;
       return null;
@@ -89,37 +91,41 @@ class DB {
       .update(newUser.password)
       .digest("hex");
     const newId = randomUUID();
-    const createdUser = {
+    const createdUser: UserT = {
       name: newUser.name,
       password: newPassword,
       id: newId,
       isOnline: false,
       wins: 0,
+      roomId: "",
     };
 
     this.usersMap.set(createdUser.id, createdUser);
     return createdUser;
   }
 
-  createRoom(user_to_add: UserT) {
-    const isAlreadyExists = [...this.roomsMap.values()].find((room) => {
-      if (
-        room.roomUsers.length === 1 &&
-        room.roomUsers[0].id === user_to_add.id
-      )
-        return true;
-      return false;
-    });
+  addNewRoom(creator_user: UserT, ws: WebSocket) {
+    // const isAlreadyExists = [...this.roomsMap.values()].some((room) => {
+    //   if (
+    //     room.roomUsers.length === 1 &&
+    //     room.roomUsers[0].id === user_to_add.id
+    //   )
+    //     return true;
+    //   return false;
+    // });
+    const isAlreadyExists = creator_user.roomId ? true : false;
     if (isAlreadyExists) return null;
     const roomId = randomUUID();
-    const newUser = { ...user_to_add };
-    delete newUser.password;
-    delete newUser.wins;
-    const roomUsers = [user_to_add];
+    const roomUser: roomUserT = {
+      id: creator_user.id,
+      name: creator_user.name,
+      ws,
+    };
     const newRoom: RoomT = {
       roomId,
-      roomUsers,
+      roomUsers: [roomUser],
     };
+    creator_user.roomId = roomId;
     this.roomsMap.set(roomId, newRoom);
     return newRoom;
   }
@@ -132,12 +138,14 @@ class DB {
     });
   }
 
-  addUserToRoom(user_to_add: UserT, roomID: string) {
+  addUserToRoom(user_to_add: UserT, roomID: string, ws: WebSocket) {
     const curRoom = this.roomsMap.get(roomID);
-    const newUser = { ...user_to_add };
-    delete newUser.password;
-    delete newUser.wins;
-    curRoom.roomUsers.push(newUser);
+    const newRoomUser: roomUserT = {
+      id: user_to_add.id,
+      name: user_to_add.name,
+      ws,
+    };
+    curRoom.roomUsers.push(newRoomUser);
     return curRoom;
   }
 
@@ -147,14 +155,16 @@ class DB {
     this.gamesMap.set(newGame.gameId, newGame);
   }
 
-  addGamePlayers(newPlayer: any) {
+  addGamePlayers(newPlayer: any, ws: WebSocket) {
     const curGame = this.gamesMap.get(newPlayer.gameId);
+    const playerShips = newPlayer.ships.map((ship) => ({
+      ...ship,
+      lifesLeft: ship.length,
+    }));
     const curPlayer: PlayerT = {
       playerId: newPlayer.indexPlayer,
-      ships: newPlayer.ships.map((ship) => ({
-        ...ship,
-        lifesLeft: ship.length,
-      })),
+      ships: playerShips,
+      playerWs: ws,
     };
     curGame.players.set(curPlayer.playerId, curPlayer);
     return curGame;

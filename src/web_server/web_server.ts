@@ -11,7 +11,6 @@ webSoscketServer.on("connection", (ws: WebSocket, _request, _client) => {
 
   ws.on("message", (message) => {
     controller(message, ws);
-    // console.log(db.getUsersMap, "\n", db.getRoomsMap);
   });
   ws.on("close", () => {
     console.log("close");

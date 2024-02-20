@@ -4,14 +4,23 @@ import { createRegResponse } from "../../utils/utils.js";
 
 export default function reg_controller(data: any, ws: WebSocket) {
   console.log("reg");
-  const isAuth = db.isAuthUser(data);
-  const user = isAuth ? db.getFoundUser : db.addNewUser(data);
-  if (!user) return createRegResponse("", "", true, "Wrong password");
-  if (user.isOnline)
-    return createRegResponse("", "", true, "User is already online");
+  const isRegisteredUser = db.isAuthUser(data);
+  const user = isRegisteredUser || db.addNewUser(data);
+  if (!user) {
+    const response = createRegResponse("", "", true, "Wrong password");
+    ws.send(response);
+    return false;
+  }
+  if (user.isOnline) {
+    const response = createRegResponse("", "", true, "User is already online");
+    ws.send(response);
+    return false;
+  }
 
   user.isOnline = true;
   db.ws_users_Map.set(ws, user);
 
-  return createRegResponse(user.name, user.id);
+  const response = createRegResponse(user.name, user.id);
+  ws.send(response);
+  return true;
 }

@@ -1,8 +1,7 @@
 import { WebSocket } from "ws";
-
 import db from "../../db/db.js";
 import { createResponse } from "../../utils/utils.js";
-import winner_controller from "./winner_controller.js";
+import { isWinner } from "../services/services.js";
 
 export default function attack_controller(
   data: any,
@@ -63,19 +62,6 @@ export default function attack_controller(
       : enemyPlayer.ships.splice(removeI, 1);
   }
 
-  if (!enemyPlayer.ships.length) {
-    const winner = db.getUsersMap.get(curPlayerId);
-    winner.wins += 1;
-    db.ws_users_Map.forEach((user, ws) => {
-      if (curGame.players.has(user.id)) {
-        const response = createResponse("finish", { winPlayer: curPlayerId });
-        ws.send(response);
-      }
-    });
-    winner_controller();
-    return false;
-  }
-
   if (isHit !== "killed") {
     const resData = {
       position: {
@@ -87,26 +73,41 @@ export default function attack_controller(
     };
     const response = createResponse("attack", resData);
     curWS.send(response);
-  } else {
-    Array.from({ length: hittedShip.length }).forEach((_, i) => {
-      const resData = {
-        position: {
-          x: !hittedShip.direction
-            ? hittedShip.position.x + i
-            : hittedShip.position.x,
-          y: hittedShip.direction
-            ? hittedShip.position.y + i
-            : hittedShip.position.y,
-        },
-        currentPlayer: curPlayerId,
-        status: "killed",
-      };
-      const response = createResponse("attack", resData);
-      curWS.send(response);
-    });
+    return isWinner(enemyPlayer.ships.length, curPlayerId, gameId);
   }
-  return true;
+
+  Array.from({ length: hittedShip.length }).forEach((_, i) => {
+    const resData = {
+      position: {
+        x: !hittedShip.direction
+          ? hittedShip.position.x + i
+          : hittedShip.position.x,
+        y: hittedShip.direction
+          ? hittedShip.position.y + i
+          : hittedShip.position.y,
+      },
+      currentPlayer: curPlayerId,
+      status: "killed",
+    };
+    const response = createResponse("attack", resData);
+    curWS.send(response);
+  });
+  return isWinner(enemyPlayer.ships.length, curPlayerId, gameId);
 }
+
+// if (!enemyPlayer.ships.length) {
+//   const winner = db.getUsersMap.get(curPlayerId);
+//   winner.wins += 1;
+
+//   curGame.players.forEach((player, _) => {
+//     const response = createResponse("finish", { winPlayer: curPlayerId });
+//     player.playerWs.send(response);
+//   });
+
+//   db.getGameMap.delete(gameId);
+//   winner_controller();
+//   return false;
+// }
 
 // for (let i = 0; i < curShip.length; i++) {
 //   if (curShip.direction) {
