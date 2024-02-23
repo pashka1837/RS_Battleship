@@ -1,4 +1,7 @@
 import { WebSocket } from "ws";
+import { dirname, resolve } from "node:path";
+import { fork } from "child_process";
+
 import reg_controller from "./controllers/reg_controller.js";
 import update_room_controller from "./controllers/update_room_controller.js";
 import create_room_ctrlr from "./controllers/create_room_controller.js";
@@ -9,6 +12,8 @@ import turn_controller from "./controllers/turn_controller.js";
 import { random } from "../utils/utils.js";
 import winner_controller from "./controllers/winner_controller.js";
 import db from "../db/db.js";
+
+const bot_filepath = resolve(__dirname + "/bot/bot.ts");
 
 export default function controller(message: any, ws: WebSocket) {
   const req = JSON.parse(message);
@@ -39,8 +44,8 @@ export default function controller(message: any, ws: WebSocket) {
       break;
     case "add_ships":
       {
-        add_ships_controller(ws, data);
-        turn_controller(data.gameId);
+        const isGameStarted = add_ships_controller(ws, data);
+        if (isGameStarted) turn_controller(data.gameId);
         // console.log(db.getGameMap);
       }
       break;
@@ -56,6 +61,27 @@ export default function controller(message: any, ws: WebSocket) {
         data.y = random(10);
         const isGameFinsished = attack_controller(data, true);
         if (!isGameFinsished) turn_controller(data.gameId);
+      }
+      break;
+    case "single_play":
+      {
+        console.log(`single_play`);
+        create_room_ctrlr(ws);
+        const curPLayer = db.ws_users_Map.get(ws);
+
+        const botId = curPLayer.botId;
+        const bot = db.getUsersMap.get(botId) || null;
+
+        const botProcess = fork(bot_filepath);
+
+        botProcess.send({ bot, roomId: curPLayer.roomId });
+        botProcess.on("message", (d: any) => {
+          console.log(d);
+          curPLayer.botId = d.botId;
+        });
+        botProcess.on("close", () => {
+          console.log("Bot process closed");
+        });
       }
       break;
 

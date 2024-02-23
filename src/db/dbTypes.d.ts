@@ -7,6 +7,7 @@ export type UserT = {
   isOnline: boolean;
   wins: number;
   roomId: string;
+  botId: string;
 };
 
 export type roomUserT = {

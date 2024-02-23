@@ -56,6 +56,7 @@ class DB {
       isOnline: false,
       wins: 0,
       roomId: "",
+      botId: "",
     };
 
     this.usersMap.set(createdUser.id, createdUser);
@@ -107,6 +108,7 @@ class DB {
 
   addGamePlayers(newPlayer: any, ws: WebSocket) {
     const curGame = this.gamesMap.get(newPlayer.gameId);
+    // console.log(newPlayer.ships);
     const playerShips = newPlayer.ships.map((ship) => ({
       ...ship,
       lifesLeft: ship.length,

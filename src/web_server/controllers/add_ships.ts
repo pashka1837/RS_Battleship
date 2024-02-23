@@ -1,6 +1,7 @@
 import { WebSocket } from "ws";
 import db from "../../db/db.js";
 import { createResponse } from "../../utils/utils.js";
+// import turn_controller from "./turn_controller.js";
 
 export default function add_ships_controller(curWs: WebSocket, data: any) {
   console.log("add_ships");
@@ -12,7 +13,7 @@ export default function add_ships_controller(curWs: WebSocket, data: any) {
   }
   const curGame = db.addGamePlayers(data, curWs);
 
-  if (curGame.players.size !== 2) return;
+  if (curGame.players.size !== 2) return false;
 
   curGame.players.forEach((player, id) => {
     const resData = {
@@ -22,16 +23,6 @@ export default function add_ships_controller(curWs: WebSocket, data: any) {
     const response = createResponse("start_game", resData);
     player.playerWs.send(response);
   });
-
-  // db.ws_users_Map.forEach((user, ws) => {
-  //   if (curGame.players.has(user.id)) {
-  //     const curPlayer = curGame.players.get(user.id);
-  //     const resData = {
-  //       ships: curPlayer.ships,
-  //       currentPlayerIndex: user.id,
-  //     };
-  //     const response = createResponse("start_game", resData);
-  //     ws.send(response);
-  //   }
-  // });
+  return true;
+  // turn_controller(curGame.gameId);
 }

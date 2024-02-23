@@ -1,5 +1,5 @@
 import db from "../../db/db.js";
-import { PlayerT, ShipT } from "../../db/dbTypes.js";
+import { ShipT } from "../../db/dbTypes.js";
 import { createResponse } from "../../utils/utils.js";
 import winner_controller from "../controllers/winner_controller.js";
 
@@ -111,6 +111,14 @@ export function createKillData(hittedShip: ShipT, curPlayerId: string) {
         currentPlayer: curPlayerId,
         status: "miss",
       };
+      // if (
+      //   missData.position.x >= 0 &&
+      //   missData.position.y >= 0 &&
+      //   missData.position.x <= 10 &&
+      //   missData.position.y <= 0
+      // ) {
+      //   resData.push(missData);
+      // }
       resData.push(missData);
     }
   });
@@ -135,7 +143,16 @@ export function createKillData(hittedShip: ShipT, curPlayerId: string) {
         currentPlayer: curPlayerId,
         status: "miss",
       };
+      // if (
+      //   missData.position.x >= 0 &&
+      //   missData.position.y >= 0 &&
+      //   missData.position.x <= 10 &&
+      //   missData.position.y <= 0
+      // ) {
+      //   resData.push(missData);
+      // }
       resData.push(missData);
+
       posX++;
       posY++;
     }

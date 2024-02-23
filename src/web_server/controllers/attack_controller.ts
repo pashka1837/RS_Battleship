@@ -10,7 +10,7 @@ export default function attack_controller(data: any, random = false) {
   let { x: attackX, y: attackY, gameId, indexPlayer: curPlayerId } = data;
   const curGame = db.getGameById(gameId);
 
-  if (curGame.currentPlayerId !== curPlayerId) return true;
+  if (curGame?.currentPlayerId !== curPlayerId) return true;
 
   console.log(random ? "random attack" : "attack");
 

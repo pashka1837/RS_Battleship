@@ -17,10 +17,4 @@ export default function turn_controller(gameId: string) {
     const response = createResponse("turn", data);
     player.playerWs.send(response);
   });
-
-  // db.ws_users_Map.forEach((user, ws) => {
-  //   if (curGame.players.has(user.id)) {
-  //     ws.send(createResponse("turn", data));
-  //   }
-  // });
 }
