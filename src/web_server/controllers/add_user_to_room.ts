@@ -1,13 +1,10 @@
 import { WebSocket } from "ws";
 import db from "../../db/db.js";
-import update_room_controller from "./update_room_controller.js";
+import update_room_controller from "./update_room.js";
 import { createResponse } from "../../utils/utils.js";
 import { randomUUID } from "node:crypto";
 
-export default function add_usr_t_rm_cntrlr(
-  enterRoomID: string,
-  curWS: WebSocket
-) {
+export default function addUserToRoom(enterRoomID: string, curWS: WebSocket) {
   console.log("add_user_to_room");
 
   const addUser = db.ws_users_Map.get(curWS);

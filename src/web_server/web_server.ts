@@ -13,7 +13,7 @@ webSoscketServer.on("connection", (ws: WebSocket) => {
     controller(message, ws);
   });
   ws.on("close", () => {
-    console.log("close");
+    console.log("User has disconected");
     const delUser = db.ws_users_Map.get(ws);
     delUser.isOnline = false;
     db.ws_users_Map.delete(ws);
@@ -23,4 +23,13 @@ webSoscketServer.on("connection", (ws: WebSocket) => {
 webSoscketServer.on("listening", () => {
   const { port } = webSoscketServer.address() as AddressInfo;
   console.log(`WS server started at port ${port} `);
+});
+
+process.on("exit", () => {
+  webSoscketServer.close();
+  console.log("Web Socket Server has been closed.");
+});
+process.on("SIGINT", () => {
+  webSoscketServer.close();
+  console.log("Web Socket Server has been closed.");
 });

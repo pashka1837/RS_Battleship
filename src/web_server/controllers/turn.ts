@@ -1,7 +1,7 @@
 import db from "../../db/db.js";
 import { createResponse } from "../../utils/utils.js";
 
-export default function turn_controller(gameId: string) {
+export default function turn(gameId: string) {
   const curGame = db.getGameById(gameId);
   const curTurn = curGame.currentPlayerId;
   const newTurn =

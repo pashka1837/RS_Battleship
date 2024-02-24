@@ -1,7 +1,7 @@
 import db from "../../db/db.js";
 import { ShipT } from "../../db/dbTypes.js";
 import { createResponse } from "../../utils/utils.js";
-import winner_controller from "../controllers/winner_controller.js";
+import winner_controller from "../controllers/winner.js";
 
 export function isWinner(
   enemyShips: ShipT[],

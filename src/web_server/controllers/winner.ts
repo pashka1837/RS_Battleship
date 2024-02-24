@@ -1,7 +1,7 @@
 import db from "../../db/db.js";
 import { createResponse } from "../../utils/utils.js";
 
-export default function winner_controller() {
+export default function winner() {
   const data = [...db.getUsersMap.values()]
     .sort((a, b) => b.wins - a.wins)
     .map((user) => ({ name: user.name, wins: user.wins }));

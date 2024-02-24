@@ -2,7 +2,7 @@ import { WebSocket } from "ws";
 import db from "../../db/db.js";
 import { createRegResponse } from "../../utils/utils.js";
 
-export default function reg_controller(data: any, ws: WebSocket) {
+export default function reg(data: any, ws: WebSocket) {
   console.log("reg");
   const isRegisteredUser = db.isAuthUser(data);
   const user = isRegisteredUser || db.addNewUser(data);

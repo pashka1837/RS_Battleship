@@ -1,5 +1,5 @@
 import { random } from "../../utils/utils.js";
-import { PositionT, unvisitedCellsT } from "./bot.types.js";
+import { PositionT, unvisitedCellsT } from "./botTypes.js";
 
 export function addCellsToCheck(
   x: number,

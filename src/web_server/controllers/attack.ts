@@ -1,18 +1,22 @@
 import db from "../../db/db.js";
-import { createResponse } from "../../utils/utils.js";
+import { createResponse, random } from "../../utils/utils.js";
 import {
   createKillData,
   getHittedShip,
   isWinner,
 } from "../services/services.js";
 
-export default function attack_controller(data: any, random = false) {
+export default function attack(data: any, isRandomAttack = false) {
   let { x: attackX, y: attackY, gameId, indexPlayer: curPlayerId } = data;
   const curGame = db.getGameById(gameId);
 
   if (curGame?.currentPlayerId !== curPlayerId) return true;
+  if (isRandomAttack) {
+    attackX = random(10);
+    attackY = random(10);
+  }
 
-  console.log(random ? "random attack" : "attack");
+  console.log(isRandomAttack ? "random attack" : "attack");
 
   const enemyPlayer = [...curGame.players.values()].find(
     (player) => player.playerId !== curPlayerId

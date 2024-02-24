@@ -1,4 +1,4 @@
-import { PositionT, unvisitedCellsT } from "../bot.types.js";
+import { PositionT, unvisitedCellsT } from "../botTypes.js";
 import { addCellsToCheck } from "../logic.js";
 
 export default function botAttack(

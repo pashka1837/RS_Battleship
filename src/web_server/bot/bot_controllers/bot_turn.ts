@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { PositionT, unvisitedCellsT } from "../bot.types.js";
+import { PositionT, unvisitedCellsT } from "../botTypes.js";
 import { generateAttack, getNextCell } from "../logic.js";
 import { createResponse } from "../../../utils/utils.js";
 

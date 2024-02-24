@@ -1,9 +1,8 @@
 import { WebSocket } from "ws";
 import db from "../../db/db.js";
 import { createResponse } from "../../utils/utils.js";
-// import turn_controller from "./turn_controller.js";
 
-export default function add_ships_controller(curWs: WebSocket, data: any) {
+export default function addShips(curWs: WebSocket, data: any) {
   console.log("add_ships");
 
   const curUser = db.ws_users_Map.get(curWs);
@@ -24,5 +23,4 @@ export default function add_ships_controller(curWs: WebSocket, data: any) {
     player.playerWs.send(response);
   });
   return true;
-  // turn_controller(curGame.gameId);
 }
