@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import bot_controller from "./bot_controller.js";
+import botController from "./bot_controller.js";
 import { UserT } from "../../db/dbTypes.js";
 
 process.on("message", (mainProcData: any) => {
@@ -32,7 +32,7 @@ function runBt(roomID: string, existingBot?: UserT) {
     );
   };
   botWs.onmessage = (res) => {
-    bot_controller(res, botWs, existingBot?.id);
+    botController(res, botWs, existingBot?.id);
   };
 
   botWs.onclose = () => {

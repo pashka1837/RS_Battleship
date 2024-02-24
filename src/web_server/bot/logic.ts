@@ -1,48 +1,64 @@
 import { random } from "../../utils/utils.js";
-import { PositionT, VisitedCellsT } from "./bot.types.js";
+import { PositionT, unvisitedCellsT } from "./bot.types.js";
 
 export function addCellsToCheck(
   x: number,
   y: number,
   cellsAr: PositionT[],
-  visitedCells: VisitedCellsT
+  unvisitedCells: unvisitedCellsT
 ) {
-  const startX = x - 1 >= 0 ? x - 1 : 0;
-  let startY = y - 1 >= 0 ? y - 1 : 0;
-  for (let i = 0; i < 3; i++) {
-    for (let z = 0; z < 3; z++) {
-      const cellToAdd = {
-        x: startX + z,
-        y: startY,
-      };
-      if (visitedCells.has(JSON.stringify(cellToAdd))) continue;
-      if (cellToAdd.x === x && cellToAdd.y === y) continue;
-      cellsAr.push({ x: startX + z, y: startY });
-    }
-    startY++;
+  let startX = x;
+  let startY = y;
+  startX = startX - 2 > 0 ? x - 2 : 0;
+  startY = startY - 2 > 0 ? y - 2 : 0;
+
+  for (let i = 0; i < 4; i++, startX++) {
+    const cellToAdd = {
+      x: startX,
+      y: y,
+    };
+
+    if (!unvisitedCells.has(`${cellToAdd.x}${cellToAdd.y}`)) continue;
+    if (cellToAdd.x === x && cellToAdd.y === y) continue;
+    cellsAr.push(cellToAdd);
   }
-  return cellsAr;
+  for (let i = 0; i < 4; i++, startY++) {
+    const cellToAdd = {
+      x: x,
+      y: startY,
+    };
+    if (!unvisitedCells.has(`${cellToAdd.x}${cellToAdd.y}`)) continue;
+    if (cellToAdd.x === x && cellToAdd.y === y) continue;
+    cellsAr.push(cellToAdd);
+  }
 }
 
-export function getNextCell(cellsAr: PositionT[], visitedCells: VisitedCellsT) {
-  let curCell = cellsAr.pop();
-  while (visitedCells.has(JSON.stringify(curCell))) {
-    curCell = cellsAr.pop();
+export function getNextCell(
+  cellsAr: PositionT[],
+  unvisitedCells: unvisitedCellsT
+) {
+  let curCell = cellsAr.shift();
+  if (!curCell) return null;
+  while (!unvisitedCells.has(`${curCell.x}${curCell.y}`)) {
+    if (!cellsAr.length) return null;
+    curCell = cellsAr.shift();
   }
-  console.log("supposing cell", curCell, cellsAr);
   return curCell || null;
 }
 
-export function generate_attack(visitedCells: VisitedCellsT) {
-  const position = {
-    x: random(10),
-    y: random(10),
-  };
-  while (visitedCells.has(JSON.stringify(position))) {
-    position.x = random(10);
-    position.y = random(10);
+export function generateAttack(unvisitedCells: unvisitedCellsT) {
+  const unVisitedCellsArray = [...unvisitedCells.values()];
+  const nextCell = unVisitedCellsArray[random(unVisitedCellsArray.length)];
+  unvisitedCells.delete(nextCell);
+  return { x: parseInt(nextCell[0]), y: parseInt(nextCell[1]) };
+}
+
+export function generateField() {
+  const fieldSet: unvisitedCellsT = new Set();
+  for (let x = 0; x < 10; x++) {
+    for (let y = 0; y < 10; y++) {
+      fieldSet.add(`${x}${y}`);
+    }
   }
-  console.log("generated attack", position);
-  visitedCells.add(JSON.stringify(position));
-  return { x: position.x, y: position.y };
+  return fieldSet;
 }

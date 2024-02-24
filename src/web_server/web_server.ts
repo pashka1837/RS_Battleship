@@ -6,7 +6,7 @@ export const webSoscketServer = new WebSocketServer({
   port: 3000,
 });
 
-webSoscketServer.on("connection", (ws: WebSocket, _request, _client) => {
+webSoscketServer.on("connection", (ws: WebSocket) => {
   ws.on("error", console.error);
 
   ws.on("message", (message) => {
@@ -20,8 +20,7 @@ webSoscketServer.on("connection", (ws: WebSocket, _request, _client) => {
   });
 });
 
-webSoscketServer.on("listening", (ws, request, client) => {
-  // console.log(ws);
+webSoscketServer.on("listening", () => {
   const { port } = webSoscketServer.address() as AddressInfo;
   console.log(`WS server started at port ${port} `);
 });

@@ -3,6 +3,6 @@ type PositionT = {
   y: number;
 };
 
-type VisitedCellsT = Set<string>;
+type unvisitedCellsT = Set<string>;
 
-export { PositionT, VisitedCellsT };
+export { PositionT, unvisitedCellsT };

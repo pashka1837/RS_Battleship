@@ -1,10 +1,15 @@
 import { WebSocket, MessageEvent } from "ws";
-import { createResponse, random } from "../../utils/utils.js";
-import ships from "./ships.js";
-import { addCellsToCheck, generate_attack, getNextCell } from "./logic.js";
-import { PositionT, VisitedCellsT } from "./bot.types.js";
+import { PositionT, unvisitedCellsT } from "./bot.types.js";
+import {
+  botReg,
+  botCreateGame,
+  botAttack,
+  botTurn,
+} from "./bot_controllers/index.js";
+import { generateField } from "./logic.js";
 
-const visitedCells: VisitedCellsT = new Set();
+const unvisitedCells: unvisitedCellsT = generateField();
+
 const cellsToCheck: PositionT[] = [];
 const bot = {
   id: null,
@@ -12,7 +17,7 @@ const bot = {
   name: null,
 };
 
-export default function bot_controller(
+export default function botController(
   res: MessageEvent,
   botWs: WebSocket,
   existingBotId?: string
@@ -21,66 +26,22 @@ export default function bot_controller(
   const msgParsed = JSON.parse(message);
   const data = msgParsed.data ? JSON.parse(msgParsed.data) : msgParsed.data;
   const type = msgParsed.type;
-  console.log("bot's action");
+
   switch (type) {
     case "reg":
-      {
-        if (!existingBotId) {
-          bot.id = data.index;
-          process.send({ botId: bot.id });
-        } else {
-          bot.id = data.index;
-          bot.name = data.name;
-        }
-      }
+      botReg(existingBotId, bot, data);
       break;
+
     case "create_game":
-      {
-        bot.gameId = data.idGame;
-        const reqData = {
-          gameId: bot.gameId,
-          ships: ships[random(ships.length)],
-          indexPlayer: bot.id,
-        };
-        const req = createResponse("add_ships", reqData);
-        botWs.send(req);
-      }
+      botCreateGame(bot, data, botWs);
       break;
+
     case "attack":
-      {
-        if (data.currentPlayer !== bot.id) break;
-
-        const position = {
-          x: data.position.x,
-          y: data.position.y,
-        };
-
-        const attacked_position = JSON.stringify(position);
-        visitedCells.add(attacked_position);
-
-        if (data.status === "shot") {
-          addCellsToCheck(position.x, position.y, cellsToCheck, visitedCells);
-        }
-      }
+      if (!botAttack(bot, data, unvisitedCells, cellsToCheck)) break;
       break;
 
     case "turn":
-      {
-        if (data.currentPlayer !== bot.id) break;
-
-        const nextCell =
-          getNextCell(cellsToCheck, visitedCells) ||
-          generate_attack(visitedCells);
-        const { x, y } = nextCell;
-        const reqData = {
-          gameId: bot.gameId,
-          x,
-          y,
-          indexPlayer: bot.id,
-        };
-        const req = createResponse("attack", reqData);
-        setTimeout(() => botWs.send(req), 1000);
-      }
+      if (!botTurn(bot, data, unvisitedCells, cellsToCheck, botWs)) break;
       break;
 
     case "finish":
@@ -88,6 +49,6 @@ export default function bot_controller(
       break;
 
     default:
-      console.log("kek");
+      break;
   }
 }
