@@ -13,8 +13,9 @@ webSoscketServer.on("connection", (ws: WebSocket) => {
     controller(message, ws);
   });
   ws.on("close", () => {
-    console.log("User has disconected");
     const delUser = db.ws_users_Map.get(ws);
+    const isBot = delUser.name.includes("bot");
+    console.log(`${isBot ? "Bot" : "User"} has been disconected.`);
     delUser.isOnline = false;
     db.ws_users_Map.delete(ws);
   });

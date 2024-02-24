@@ -36,7 +36,7 @@ function runBt(roomID: string, existingBot?: UserT) {
   };
 
   botWs.onclose = () => {
-    console.log("Bot's WebSocket closed");
+    console.log("Bot WebSocket has been closed.");
     process.exit();
   };
 }

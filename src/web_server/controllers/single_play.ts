@@ -19,5 +19,5 @@ export default function singlePlay(curWs: WebSocket) {
 
   botProcess.send({ bot, roomId: curPLayer.roomId });
   botProcess.on("message", (d: any) => (curPLayer.botId = d.botId));
-  botProcess.on("close", () => console.log("Bot process closed"));
+  botProcess.on("close", () => console.log("Bot process closed."));
 }
