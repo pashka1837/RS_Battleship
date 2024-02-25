@@ -1,28 +1,24 @@
 {
-    "name": "ws_task",
+    "name": "battleship_task",
     "version": "1.0.0",
-    "description": "Template for the WebSocket remote control task",
+    "description": "Battleship back/front end",
     "main": "index.js",
     "type": "module",
     "scripts": {
         "start": "node ./build/index.js",
         "start:dev": " tsx watch index.ts",
-        "build": "tsc --build",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "build": "tsc --build"
     },
     "author": "pashka1837",
     "keywords": [],
     "license": "ISC",
     "devDependencies": {
         "@types/ws": "^8.5.10",
-        "nodemon": "^2.0.16",
         "tsx": "^4.7.1",
         "typescript": "^5.3.3"
     },
     "dependencies": {
         "@types/node": "^20.11.19",
-        "ts-node": "^10.9.2",
-        "ts-node-dev": "^2.0.0",
         "ws": "^8.8.0"
     }
 }
