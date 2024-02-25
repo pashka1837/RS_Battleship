@@ -12,10 +12,13 @@ webSoscketServer.on("connection", (ws: WebSocket) => {
   ws.on("message", (message) => {
     controller(message, ws);
   });
+
   ws.on("close", () => {
     const delUser = db.ws_users_Map.get(ws);
     const isBot = delUser.name.includes("bot");
-    console.log(`${isBot ? "Bot" : "User"} has been disconected.`);
+    console.log(
+      `${isBot ? "Bot has been" : delUser.name + " has"} disconected.`
+    );
     delUser.isOnline = false;
     db.ws_users_Map.delete(ws);
   });
