@@ -4,9 +4,12 @@
       "target": "ES2022",
       "module": "NodeNext",
       "moduleResolution": "NodeNext",
-      "outDir": "build",
-      "sourceMap": true,
+      "outDir": "./build",
+      "sourceMap": true,   
     },
-  "include": ["src/**/*.ts", "/*.ts"],
-  "exclude": ["node_modules"],
+  "include": ["src/**/*.ts", "/*.ts", "*.ts"],
+  "exclude": ["node_modules, build"],
+
+
+  
 }

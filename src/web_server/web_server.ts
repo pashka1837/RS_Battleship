@@ -33,4 +33,5 @@ process.on("exit", () => {
 process.on("SIGINT", () => {
   webSoscketServer.close();
   console.log("Web Socket Server has been closed.");
+  process.exit();
 });

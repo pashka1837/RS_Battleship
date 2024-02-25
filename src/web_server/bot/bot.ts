@@ -3,6 +3,7 @@ import botController from "./bot_controller.js";
 import { UserT } from "../../db/dbTypes.js";
 
 process.on("message", (mainProcData: any) => {
+  console.log("Bot porcess has been opened.");
   const { bot, roomId } = mainProcData;
   runBt(roomId, bot);
 });
@@ -10,6 +11,7 @@ process.on("message", (mainProcData: any) => {
 function runBt(roomID: string, existingBot?: UserT) {
   const botWs = new WebSocket("ws://localhost:3000");
   botWs.onopen = (_) => {
+    console.log("Bot websocket has been connected.");
     botWs.send(
       JSON.stringify({
         type: "reg",

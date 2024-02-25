@@ -5,8 +5,9 @@
     "main": "index.js",
     "type": "module",
     "scripts": {
-        "start": "node ./index.js",
+        "start": "node ./build/index.js",
         "start:dev": "ts-node-dev --import tsx index.ts",
+        "build": "tsc --build",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "pashka1837",

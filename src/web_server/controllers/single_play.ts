@@ -1,6 +1,7 @@
 import { WebSocket } from "ws";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { fork } from "child_process";
+import { fileURLToPath } from "url";
 
 import createRoom from "./create_room.js";
 import db from "../../db/db.js";
@@ -9,11 +10,14 @@ export default function singlePlay(curWs: WebSocket) {
   console.log(`single_play`);
   createRoom(curWs);
 
+  const curFilename = fileURLToPath(import.meta.url);
+  const curDirname = dirname(curFilename);
+  const botFilepath = resolve(curDirname + "./../bot/bot");
+
   const curPLayer = db.ws_users_Map.get(curWs);
 
   const botId = curPLayer.botId;
   const bot = db.getUsersMap.get(botId) || null;
-  const botFilepath = resolve(__dirname + "./../bot/bot.ts");
 
   const botProcess = fork(botFilepath);
 
