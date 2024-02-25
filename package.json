@@ -6,7 +6,7 @@
     "type": "module",
     "scripts": {
         "start": "node ./build/index.js",
-        "start:dev": "ts-node-dev --import tsx index.ts",
+        "start:dev": " tsx watch index.ts",
         "build": "tsc --build",
         "test": "echo \"Error: no test specified\" && exit 1"
     },

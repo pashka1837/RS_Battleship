@@ -26,12 +26,12 @@ webSoscketServer.on("listening", () => {
   console.log(`WS server started at port ${port} `);
 });
 
-process.on("exit", () => {
-  webSoscketServer.close();
-  console.log("Web Socket Server has been closed.");
-});
+webSoscketServer.on("close", () =>
+  console.log("Web Socket Server has been closed.")
+);
+
+process.on("exit", () => webSoscketServer.close());
 process.on("SIGINT", () => {
   webSoscketServer.close();
-  console.log("Web Socket Server has been closed.");
   process.exit();
 });
