@@ -1,84 +1,124 @@
 import { randomUUID, createHash } from "node:crypto";
-
-type UserT = {
-  name: string;
-  password: string;
-  id: `${string}-${string}-${string}-${string}-${string}`;
-};
-
-type RoomT = {
-  roomId: `${string}-${string}-${string}-${string}-${string}`;
-  roomUsers: Omit<UserT, "password">[];
-};
+import { WebSocket } from "ws";
+import { GameT, PlayerT, RoomT, UserT, roomUserT } from "./dbTypes.js";
 
 class DB {
-  private users: UserT[] = [];
-  private rooms: RoomT[] = [];
+  private gamesMap = new Map<string, GameT>();
+  private roomsMap = new Map<string, RoomT>();
+  private usersMap = new Map<string, UserT>();
+  public ws_users_Map = new Map<WebSocket, UserT>();
+  private foundUser: UserT | null = null;
 
-  get getUsers() {
-    return this.users;
-  }
-  get getRooms() {
-    return this.rooms;
+  getGameById(id: string) {
+    return this.gamesMap.get(id);
   }
 
-  getUserById(id: string) {
-    return this.users.find((user) => user.id === id);
+  get getGameMap() {
+    return this.gamesMap;
+  }
+
+  get getUsersMap() {
+    return this.usersMap;
+  }
+
+  get getRoomsMap() {
+    return this.roomsMap;
   }
 
   getUserByName(name: string) {
-    return this.users.find((user) => user.name === name);
+    this.foundUser = [...this.usersMap.values()].find(
+      (user) => user.name === name
+    );
   }
 
-  isAuthUser(newUser: Omit<UserT, "id">) {
-    const foundUser = this.getUserByName(newUser.name);
-    if (!foundUser) return false;
+  isAuthUser(newUser: any) {
+    this.getUserByName(newUser.name);
+    if (!this.foundUser) return false;
     const newPassword = createHash("sha256")
       .update(newUser.password)
       .digest("hex");
-    return newPassword === foundUser.password;
+    return newPassword === this.foundUser.password && this.foundUser;
   }
 
-  addNewUser(newUser: Omit<UserT, "id">) {
-    const foundUser = this.getUserByName(newUser.name);
-    if (foundUser) return null;
+  addNewUser(newUser: any) {
+    if (this.foundUser) {
+      this.foundUser = null;
+      return null;
+    }
     const newPassword = createHash("sha256")
       .update(newUser.password)
       .digest("hex");
     const newId = randomUUID();
-    const createdUser = {
+    const createdUser: UserT = {
       name: newUser.name,
       password: newPassword,
       id: newId,
+      isOnline: false,
+      wins: 0,
+      roomId: "",
+      botId: "",
     };
-    this.users.push(createdUser);
+
+    this.usersMap.set(createdUser.id, createdUser);
     return createdUser;
   }
 
-  createRoom(user_to_add: Omit<UserT, "password">) {
+  addNewRoom(creator_user: UserT, ws: WebSocket) {
+    const isAlreadyExists = creator_user.roomId ? true : false;
+    if (isAlreadyExists) return null;
     const roomId = randomUUID();
-    const roomUsers = [user_to_add];
+    const roomUser: roomUserT = {
+      id: creator_user.id,
+      name: creator_user.name,
+      ws,
+    };
     const newRoom: RoomT = {
       roomId,
-      roomUsers,
+      roomUsers: [roomUser],
     };
-    this.rooms.push(newRoom);
+    creator_user.roomId = roomId;
+    this.roomsMap.set(roomId, newRoom);
     return newRoom;
   }
 
-  //&& room.roomUsers[0].id !== myId
-  getEmptyRoom() {
-    return (
-      this.rooms.find((room) => {
-        if (room.roomUsers.length === 1) return true;
-        return false;
-      }) || null
-    );
+  getEmptyRooms(id: string) {
+    return [...this.roomsMap.values()].filter((room) => {
+      if (room.roomUsers.length === 1 && room.roomUsers[0].id !== id)
+        return true;
+      return false;
+    });
   }
 
-  addUserToRoom(user_to_add: Omit<UserT, "password">, roomId: string) {
-    const curRoom = this.rooms.find((room) => room.roomId === roomId);
-    curRoom.roomUsers.push(user_to_add);
+  addUserToRoom(user_to_add: UserT, roomID: string, ws: WebSocket) {
+    const curRoom = this.roomsMap.get(roomID);
+    const newRoomUser: roomUserT = {
+      id: user_to_add.id,
+      name: user_to_add.name,
+      ws,
+    };
+    curRoom.roomUsers.push(newRoomUser);
+    return curRoom;
+  }
+
+  addNewGame(newGame: any) {
+    newGame.players = new Map<string, PlayerT>();
+    newGame.currentPlayerId = "";
+    this.gamesMap.set(newGame.gameId, newGame);
+  }
+
+  addGamePlayers(newPlayer: any, ws: WebSocket) {
+    const curGame = this.gamesMap.get(newPlayer.gameId);
+    const playerShips = newPlayer.ships.map((ship) => ({
+      ...ship,
+      lifesLeft: ship.length,
+    }));
+    const curPlayer: PlayerT = {
+      playerId: newPlayer.indexPlayer,
+      ships: playerShips,
+      playerWs: ws,
+    };
+    curGame.players.set(curPlayer.playerId, curPlayer);
+    return curGame;
   }
 }
 
